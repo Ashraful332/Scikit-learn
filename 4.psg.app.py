@@ -88,4 +88,8 @@ print("Training complete!")
 # Predict
 predictions = model.predict(X_test)
 
-print(predictions[1])
+print("Real Grades:")
+print(y_test[:5].values)
+
+print("Predicted Grades:")
+print(predictions[:5])
