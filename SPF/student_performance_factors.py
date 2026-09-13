@@ -261,3 +261,133 @@ LoadTrainCsv = 'https://raw.githubusercontent.com/Ashraful332/Scikit-learn/main/
 TrainData = pd.read_csv(LoadTrainCsv)
 TrainData.head()
 
+#@title Convert string TrainData into number
+
+# convert Parental_Involvement Low Medium High into 0 1 2
+TrainData['Parental_Involvement'] = TrainData['Parental_Involvement'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+
+TrainData['Parental_Involvement'].head()
+
+# convert Access_to_Resources Low Medium High into 0 1 2
+TrainData['Access_to_Resources'] = TrainData['Access_to_Resources'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+TrainData['Access_to_Resources'].head()
+
+# convert Extracurricular_Activities Yes/No into 1/0
+TrainData["Extracurricular_Activities"] = TrainData["Extracurricular_Activities"].map({
+    "No": 0,
+    "Yes": 1
+})
+TrainData["Extracurricular_Activities"].head()
+
+# convert Motivation_Level Low Medium High into 0 1 2
+TrainData['Motivation_Level'] = TrainData['Motivation_Level'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+TrainData['Motivation_Level'].head()
+
+# convert Internet_Access Yes/No into 1/0
+TrainData["Internet_Access"] = TrainData["Internet_Access"].map({
+    "No": 0,
+    "Yes": 1
+})
+TrainData["Internet_Access"].head()
+
+# convert Family_Income Low Medium High into 0 1 2
+TrainData['Family_Income'] = TrainData['Family_Income'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+TrainData['Family_Income'].head()
+
+# convert Teacher_Quality Low Medium High into 0 1 2
+TrainData['Teacher_Quality'] = TrainData['Teacher_Quality'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+}).astype('Int64')
+TrainData['Teacher_Quality'].head()
+
+# convert School_Type Public/Private into 1/0
+TrainData["School_Type"] = TrainData["School_Type"].map({
+    "Public": 0,
+    "Private": 1
+})
+TrainData["School_Type"].head()
+
+# convert Peer_Influence Low Medium High into 0 1 2
+TrainData['Peer_Influence'] = TrainData['Peer_Influence'].map({
+    "Negative":0,
+    "Positive":1,
+    "Neutral":2
+})
+TrainData['Peer_Influence'].head()
+
+# convert Learning_Disabilities Yes/No into 1/0
+TrainData["Learning_Disabilities"] = TrainData["Learning_Disabilities"].map({
+    "No": 0,
+    "Yes": 1
+})
+TrainData["Learning_Disabilities"].head()
+
+# convert Parental_Education_Level Low Medium High into 0 1 2
+TrainData['Parental_Education_Level'] = TrainData['Parental_Education_Level'].map({
+    "High School":0,
+    "College":1,
+    "Postgraduate":2
+}).astype('Int64')
+TrainData['Parental_Education_Level'].head()
+
+# convert Distance_from_Home Low Medium High into 0 1 2
+TrainData['Distance_from_Home'] = TrainData['Distance_from_Home'].map({
+    "Near":0,
+    "Moderate":1,
+    "Far":2
+}).astype('Int64')
+TrainData['Distance_from_Home'].head()
+
+# convert Gender Yes/No into 1/0
+TrainData["Gender"] = TrainData["Gender"].map({
+    "Male": 0,
+    "Female": 1
+})
+TrainData["Gender"].head()
+
+# Replaces NaNs as 0
+TrainData['Exam_Score'] = TrainData['Exam_Score'].fillna(0).astype('Int64')
+
+TrainData.head()
+
+#@title Test CSV file
+
+# Load model
+model = joblib.load("student_placement_model.pkl")
+
+test_data = TrainData
+
+# Drop rows with any NaN values to handle potential NaNs introduced during mapping
+test_data.dropna(inplace=True)
+
+# 3. Separate feature columns from the target column
+X_test = test_data.drop(columns=["Exam_Score"])
+
+# 4. Generate predictions
+predicted_scores = model.predict(X_test)
+
+# 5. Fill the Exam_Score column with the model's predictions
+test_data["Exam_Score"] = predicted_scores
+
+# 6. Export the updated dataset to a new CSV file
+test_data.to_csv("test_with_predictions.csv", index=False)
+
+print("Predictions filled and saved to 'test_with_predictions.csv'")
