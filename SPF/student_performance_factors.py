@@ -14,6 +14,10 @@ import numpy as np
 
 from bokeh.io import output_notebook
 from bokeh.plotting import figure, show
+import joblib
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
 #@title Loading data
 
@@ -36,7 +40,7 @@ show(p)
 
 #@title Hours_Studied to Exam_Score
 
-p = figure(title="My Beautiful Bokeh Graph",width=400, height=400)
+p = figure(title="Hours Studied vs Exam Score",width=400, height=400)
 
 p.scatter(data['Hours_Studied'], data['Exam_Score'], size=20, color="navy", alpha=0.5)
 
@@ -44,4 +48,216 @@ p.xaxis.axis_label = "Hours_Studied"
 p.yaxis.axis_label = "Exam Score"
 
 show(p)
+
+#@title Attendance vs Exam_Score
+p = figure(title="Attendance vs Exam Score",width=400, height=400)
+
+p.scatter(data['Attendance'], data['Exam_Score'], size=20, color="navy", alpha=0.5)
+
+p.xaxis.axis_label = "Attendance"
+p.yaxis.axis_label = "Exam Score"
+
+show(p)
+
+Family_Income = data['Family_Income'].unique()
+Exam_Score = data['Exam_Score']
+
+p = figure(x_range=Family_Income, height=350, title="Family Income vs Exam Score",
+           toolbar_location=None, tools="")
+
+p.vbar(x=Family_Income, top=Exam_Score, width=0.9)
+
+p.xgrid.grid_line_color = None
+p.y_range.start = 0
+
+p.xaxis.axis_label = "Family Income"
+p.yaxis.axis_label = "Exam Score"
+
+show(p)
+
+#@title Sleep_Hours vs Exam Score
+p = figure(title="Sleep Hours vs Exam Score",width=400, height=400)
+
+p.scatter(data['Sleep_Hours'], data['Exam_Score'], size=20, color="navy", alpha=0.5)
+
+p.xaxis.axis_label = "Sleep_Hours"
+p.yaxis.axis_label = "Exam Score"
+
+show(p)
+
+"""# Train Model"""
+
+data = pd.read_csv(LoadCsv)
+data.head()
+
+# convert Parental_Involvement Low Medium High into 0 1 2
+data['Parental_Involvement'] = data['Parental_Involvement'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+
+data['Parental_Involvement'].head()
+
+# convert Access_to_Resources Low Medium High into 0 1 2
+data['Access_to_Resources'] = data['Access_to_Resources'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+data['Access_to_Resources'].head()
+
+# convert Extracurricular_Activities Yes/No into 1/0
+data["Extracurricular_Activities"] = data["Extracurricular_Activities"].map({
+    "No": 0,
+    "Yes": 1
+})
+data["Extracurricular_Activities"].head()
+
+# convert Motivation_Level Low Medium High into 0 1 2
+data['Motivation_Level'] = data['Motivation_Level'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+data['Motivation_Level'].head()
+
+# convert Internet_Access Yes/No into 1/0
+data["Internet_Access"] = data["Internet_Access"].map({
+    "No": 0,
+    "Yes": 1
+})
+data["Internet_Access"].head()
+
+# convert Family_Income Low Medium High into 0 1 2
+data['Family_Income'] = data['Family_Income'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+})
+data['Family_Income'].head()
+
+# convert Teacher_Quality Low Medium High into 0 1 2
+data['Teacher_Quality'] = data['Teacher_Quality'].map({
+    "Low":0,
+    "Medium":1,
+    "High":2
+}).astype('Int64')
+data['Teacher_Quality'].head()
+
+# convert School_Type Public/Private into 1/0
+data["School_Type"] = data["School_Type"].map({
+    "Public": 0,
+    "Private": 1
+})
+data["School_Type"].head()
+
+# convert Peer_Influence Low Medium High into 0 1 2
+data['Peer_Influence'] = data['Peer_Influence'].map({
+    "Negative":0,
+    "Positive":1,
+    "Neutral":2
+})
+data['Peer_Influence'].head()
+
+# convert Learning_Disabilities Yes/No into 1/0
+data["Learning_Disabilities"] = data["Learning_Disabilities"].map({
+    "No": 0,
+    "Yes": 1
+})
+data["Learning_Disabilities"].head()
+
+# convert Parental_Education_Level Low Medium High into 0 1 2
+data['Parental_Education_Level'] = data['Parental_Education_Level'].map({
+    "High School":0,
+    "College":1,
+    "Postgraduate":2
+}).astype('Int64')
+data['Parental_Education_Level'].head()
+
+# convert Distance_from_Home Low Medium High into 0 1 2
+data['Distance_from_Home'] = data['Distance_from_Home'].map({
+    "Near":0,
+    "Moderate":1,
+    "Far":2
+}).astype('Int64')
+data['Distance_from_Home'].head()
+
+# convert Gender Yes/No into 1/0
+data["Gender"] = data["Gender"].map({
+    "Male": 0,
+    "Female": 1
+})
+data["Gender"].head()
+
+"""## Training Model"""
+
+data['Exam_Score']
+
+# @title Working Simple code
+
+# Drop rows with any NaN values
+data.dropna(inplace=True)
+
+# Features
+X = data[[
+    "Hours_Studied",	"Attendance",	"Parental_Involvement",	"Access_to_Resources",	"Extracurricular_Activities",
+    "Sleep_Hours",	"Previous_Scores",	"Motivation_Level",	"Internet_Access",	"Tutoring_Sessions",	"Family_Income",
+    "Teacher_Quality",	"School_Type",	"Peer_Influence",	"Physical_Activity",	"Learning_Disabilities",
+    "Parental_Education_Level",	"Distance_from_Home",	"Gender"
+]]
+
+# Target
+y = data['Exam_Score']
+
+# Split Data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Set Model
+model = LinearRegression()
+
+# Train Model
+model.fit(X_train, y_train)
+
+print("Training Complete!")
+
+# =========================
+# SAVE MODEL
+# =========================
+
+joblib.dump(model, "student_placement_model.pkl")
+
+print("Model saved!")
+
+"""# Predict Model"""
+
+data.head()
+
+# Load Save Model
+def load_model(model_path):
+    model = joblib.load(model_path)
+    print("Model loaded!")
+    return model
+# load_model("student_placement_model.pkl")
+
+
+
+# Predict new student placement
+# The input array had 20 features, but the model expects 19.
+# Removed the leading '0' to match the 19 features: Hours_Studied, Attendance, Parental_Involvement, Access_to_Resources, Extracurricular_Activities, Sleep_Hours, Previous_Scores, Motivation_Level, Internet_Access, Tutoring_Sessions, Family_Income, Teacher_Quality, School_Type, Peer_Influence, Physical_Activity, Learning_Disabilities, Parental_Education_Level, Distance_from_Home, Gender.
+result = model.predict([[
+    23,	84,	0,	2,	0,	7,	73,	0,	1,	0,	0,	1,	0,	1,	3,	0,	0,	0,	0
+]])
+
+print("Prediction:", result)
+
+"""## Predict Model with test.csv file"""
+
+#@title Loading test data
+
+LoadTrainCsv = 'https://raw.githubusercontent.com/Ashraful332/Scikit-learn/main/data/SPF/test.csv'
+TrainData = pd.read_csv(LoadTrainCsv)
+TrainData.head()
 
